@@ -66,12 +66,12 @@ def main(args):
     save_filename = './models/{0}'.format(args.output_folder)
     
     train_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/train.tsv',
-                         '/nobackup/anakuzne/data/cv/target-segments/eu/')
+                         '/nobackup/anakuzne/data/cv/target-segments/eu/clips/')
 
     valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/dev.tsv',
-                        '/nobackup/anakuzne/data/cv/target-segments/eu/')
+                        '/nobackup/anakuzne/data/cv/target-segments/eu/clips/')
     test_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/test.tsv',
-                         '/nobackup/anakuzne/data/cv/target-segments/eu/')
+                         '/nobackup/anakuzne/data/cv/target-segments/eu/clips/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
