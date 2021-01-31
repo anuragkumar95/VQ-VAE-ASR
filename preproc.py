@@ -31,7 +31,7 @@ def collate_custom(data):
     
     batch = []
     batch_mask = []
-    transcripts = data["transcript"]
+    transcripts = data["sentence"]
     paths = data["path"]
     maxlen = maxlen_fn(paths, get_MFCC)
     for audio in paths:
