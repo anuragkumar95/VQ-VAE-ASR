@@ -110,11 +110,11 @@ def collate_vae(data):
     maxlen = maxlen_fn(data, get_MFCC)
 
     for audio in data:
-        audio, sr = torchaudio.load(audio)
+        audio, sr = torchaudio.load(audio, num_channels=1)
         print(audio.shape)
         audio = torch.stft(audio, n_fft=512, 
                             win_length=400, hop_length=160, 
-                            normalized=True, num_channels=1)
+                            normalized=True)
         print('Audio shape', audio.shape)
         #Extract features...
         mfcc = get_MFCC(audio)
