@@ -101,6 +101,7 @@ def collate_vae(data):
         for f in paths:
             sig, sr = torchaudio.load(f)
             sig = fn(sig)
+            print(sig.shape)
             if sig.shape[1] > max_len:
                 max_len = sig.shape[1]
         return int(max_len)
