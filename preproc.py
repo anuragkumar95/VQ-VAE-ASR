@@ -21,17 +21,19 @@ def collate_custom(data):
     def maxlen_fn(paths, fn):
         max_len=0
         for f in paths:
-            sig, sr = librosa.core.load(f, sr=16000)
+            sig, sr = torchaudio.load(audio, sr=sample_rate)
             sig = fn(torch.tensor(sig))
             if sig.shape[1] > max_len:
                 max_len = sig.shape[1]
         return int(max_len)
 
-    maxlen = maxlen_fn(paths, get_MFCC)
+    
     batch = []
     batch_mask = []
-    transcripts = [ex[1] for ex in data]
-    for audio, _ in data:
+    transcripts = data["transcript"]
+    paths = data["path"]
+    maxlen = maxlen_fn(paths, get_MFCC)
+    for audio in paths:
         audio, sr = torchaudio.load(audio, sr=sample_rate)
         #Extract features...
         mfcc = get_MFCC(audio)
@@ -46,7 +48,7 @@ def collate_custom(data):
         
         batch.append(batch_audio)
         batch_mask.append(mask)
-        
+
     return {"feature":torch.stack(batch_audio), 
             "mask":torch.stack(batch_mask), 
             "transcript":transcripts}
@@ -63,5 +65,7 @@ class Data(data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        sample = (self.path[idx],self.transcripts[idx])
+        
+        sample = {"path":self.path[idx],
+                  "transcript":self.transcripts[idx]}
         return sample
