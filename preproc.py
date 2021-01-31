@@ -108,8 +108,6 @@ def collate_vae(data):
     
     batch = []
     maxlen = maxlen_fn(data, get_MFCC)
-    print("Maxlen", maxlen)
-
     for audio in data:
         audio, sr = torchaudio.load(audio)
         #Extract features...
