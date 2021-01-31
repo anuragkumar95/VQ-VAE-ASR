@@ -1,3 +1,4 @@
+ #!/usr/bin/env python -W ignore::DeprecationWarning
 '''
 Credit: https://github.com/ritheshkumar95/pytorch-vqvae
 '''
