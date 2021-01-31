@@ -85,7 +85,7 @@ def main(args):
 
     # Fixed images for Tensorboard
 
-    print('TEST LOADER:', len(test_loader))
+    print('TEST LOADER:', test_loader[0])
     
     fixed_images, _ = next(iter(test_loader))
     fixed_grid = make_grid(fixed_images, nrow=8, range=(-1, 1), normalize=True)
