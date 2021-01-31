@@ -83,9 +83,9 @@ def main(args):
     test_loader = torch.utils.data.DataLoader(test_dataset,
         batch_size=16, shuffle=True, collate_fn=collate_vae)
 
-    print("DATA:", len(train_loader))
-
     # Fixed images for Tensorboard
+
+    print(test_loader)
     
     fixed_images, _ = next(iter(test_loader))
     fixed_grid = make_grid(fixed_images, nrow=8, range=(-1, 1), normalize=True)
