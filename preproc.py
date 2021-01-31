@@ -118,4 +118,4 @@ def collate_vae(data):
         batch_audio = nn.ZeroPad2d(padding=(0, maxlen-feature.shape[1], 0, 0))(feature)
         batch.append(batch_audio)
 
-    return torch.stack(batch).usqueeze(1)
+    return torch.stack(batch).unsqueeze(1)
