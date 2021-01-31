@@ -19,6 +19,7 @@ def train(data_loader, model, optimizer, args, writer):
 
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
+        print('x_:', x_tilde.shape, feats.shape)
 
         # Reconstruction loss
         loss_recons = F.mse_loss(x_tilde, feats)
