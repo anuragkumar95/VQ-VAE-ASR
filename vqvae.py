@@ -9,19 +9,19 @@ from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
 
 from vq_modules import VectorQuantizedVAE, to_scalar
-from datasets import MiniImagenet
+from preproc import Data, collate_custom
 
 from tensorboardX import SummaryWriter
 
 def train(data_loader, model, optimizer, args, writer):
-    for images, _ in data_loader:
-        images = images.to(args.device)
+    for batch in data_loader:
+        feats = batch['features'].to(args.device)
 
         optimizer.zero_grad()
-        x_tilde, z_e_x, z_q_x = model(images)
+        x_tilde, z_e_x, z_q_x = model(feats)
 
         # Reconstruction loss
-        loss_recons = F.mse_loss(x_tilde, images)
+        loss_recons = F.mse_loss(x_tilde, feats)
         # Vector quantization objective
         loss_vq = F.mse_loss(z_q_x, z_e_x.detach())
         # Commitment objective
@@ -40,10 +40,10 @@ def train(data_loader, model, optimizer, args, writer):
 def test(data_loader, model, args, writer):
     with torch.no_grad():
         loss_recons, loss_vq = 0., 0.
-        for images, _ in data_loader:
-            images = images.to(args.device)
-            x_tilde, z_e_x, z_q_x = model(images)
-            loss_recons += F.mse_loss(x_tilde, images)
+        for batch in data_loader:
+            feats = batch['features'].to(args.device)
+            x_tilde, z_e_x, z_q_x = model(feats)
+            loss_recons += F.mse_loss(x_tilde, feats)
             loss_vq += F.mse_loss(z_q_x, z_e_x)
 
         loss_recons /= len(data_loader)
@@ -55,67 +55,35 @@ def test(data_loader, model, args, writer):
 
     return loss_recons.item(), loss_vq.item()
 
-def generate_samples(images, model, args):
+def generate_samples(feats, model, args):
     with torch.no_grad():
-        images = images.to(args.device)
+        feats = feats.to(args.device)
         x_tilde, _, _ = model(images)
     return x_tilde
 
 def main(args):
     writer = SummaryWriter('./logs/{0}'.format(args.output_folder))
     save_filename = './models/{0}'.format(args.output_folder)
+    
+    train_dataset = Data('/nobackup/anakuzne/data/cv/target-segments/eu/train.tsv',
+                         '/nobackup/anakuzne/data/cv/target-segments/eu/')
 
-    if args.dataset in ['mnist', 'fashion-mnist', 'cifar10']:
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
-        if args.dataset == 'mnist':
-            # Define the train & test datasets
-            train_dataset = datasets.MNIST(args.data_folder, train=True,
-                download=True, transform=transform)
-            test_dataset = datasets.MNIST(args.data_folder, train=False,
-                transform=transform)
-            num_channels = 1
-        elif args.dataset == 'fashion-mnist':
-            # Define the train & test datasets
-            train_dataset = datasets.FashionMNIST(args.data_folder,
-                train=True, download=True, transform=transform)
-            test_dataset = datasets.FashionMNIST(args.data_folder,
-                train=False, transform=transform)
-            num_channels = 1
-        elif args.dataset == 'cifar10':
-            # Define the train & test datasets
-            train_dataset = datasets.CIFAR10(args.data_folder,
-                train=True, download=True, transform=transform)
-            test_dataset = datasets.CIFAR10(args.data_folder,
-                train=False, transform=transform)
-            num_channels = 3
-        valid_dataset = test_dataset
-    elif args.dataset == 'miniimagenet':
-        transform = transforms.Compose([
-            transforms.RandomResizedCrop(128),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
-        # Define the train, valid & test datasets
-        train_dataset = MiniImagenet(args.data_folder, train=True,
-            download=True, transform=transform)
-        valid_dataset = MiniImagenet(args.data_folder, valid=True,
-            download=True, transform=transform)
-        test_dataset = MiniImagenet(args.data_folder, test=True,
-            download=True, transform=transform)
-        num_channels = 3
+    valid_dataset = Data('/nobackup/anakuzne/data/cv/target-segments/eu/dev.tsv',
+                        '/nobackup/anakuzne/data/cv/target-segments/eu/')
+    test_dataset = Data('/nobackup/anakuzne/data/cv/target-segments/eu/test.tsv',
+                         '/nobackup/anakuzne/data/cv/target-segments/eu/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
         batch_size=args.batch_size, shuffle=False,
-        num_workers=args.num_workers, pin_memory=True)
+        num_workers=args.num_workers, pin_memory=True, collate_fn=collate_custom)
     valid_loader = torch.utils.data.DataLoader(valid_dataset,
         batch_size=args.batch_size, shuffle=False, drop_last=True,
-        num_workers=args.num_workers, pin_memory=True)
+        num_workers=args.num_workers, pin_memory=True, collate_fn=collate_custom)
     test_loader = torch.utils.data.DataLoader(test_dataset,
-        batch_size=16, shuffle=True)
+        batch_size=16, shuffle=True, collate_fn=collate_custom)
+
+    print("DATA:", len(train_loader))
 
     # Fixed images for Tensorboard
     fixed_images, _ = next(iter(test_loader))
