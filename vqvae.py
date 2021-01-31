@@ -88,7 +88,7 @@ def main(args):
 
     print('TEST LOADER:', test_loader)
 
-    model = VectorQuantizedVAE(1, args.hidden_size, args.k).to(args.device)
+    model = VectorQuantizedVAE(3, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
 
