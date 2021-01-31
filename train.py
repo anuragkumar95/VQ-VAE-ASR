@@ -13,3 +13,5 @@ import torch.nn.functional as F
 dataset = Data('/nobackup/anakuzne/data/cv/target-segments/eu/train.tsv',
                 '/nobackup/anakuzne/data/cv/target-segments/eu/')
 loader = data.DataLoader(dataset, batch_size=5, shuffle=True, collate_fn=collate_custom)
+
+print(len(loader))
