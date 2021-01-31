@@ -111,6 +111,7 @@ def collate_vae(data):
 
     for audio in data:
         audio, sr = torchaudio.load(audio)
+        print(audio.shape)
         audio = torch.stft(audio, n_fft=512, 
                             win_length=400, hop_length=160, 
                             normalized=True)
