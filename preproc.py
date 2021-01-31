@@ -99,7 +99,7 @@ def collate_vae(data):
     def maxlen_fn(paths, fn):
         max_len=0
         for f in paths:
-            sig, sr = torchaudio.load(f, sr=sample_rate)
+            sig, sr = torchaudio.load(f)
             sig = fn(torch.tensor(sig))
             if sig.shape[1] > max_len:
                 max_len = sig.shape[1]
