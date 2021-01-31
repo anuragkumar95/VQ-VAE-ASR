@@ -114,7 +114,7 @@ def collate_vae(data):
         print(audio.shape)
         audio = torch.stft(audio, n_fft=512, 
                             win_length=400, hop_length=160, 
-                            normalized=True)
+                            normalized=True, num_channels=1)
         print('Audio shape', audio.shape)
         #Extract features...
         mfcc = get_MFCC(audio)
