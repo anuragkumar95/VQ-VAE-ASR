@@ -65,23 +65,23 @@ def main(args):
     writer = SummaryWriter('./logs/{0}'.format(args.output_folder))
     save_filename = './models/{0}'.format(args.output_folder)
     
-    train_dataset = Data('/nobackup/anakuzne/data/cv/target-segments/eu/train.tsv',
+    train_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/train.tsv',
                          '/nobackup/anakuzne/data/cv/target-segments/eu/')
 
-    valid_dataset = Data('/nobackup/anakuzne/data/cv/target-segments/eu/dev.tsv',
+    valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/dev.tsv',
                         '/nobackup/anakuzne/data/cv/target-segments/eu/')
-    test_dataset = Data('/nobackup/anakuzne/data/cv/target-segments/eu/test.tsv',
+    test_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/test.tsv',
                          '/nobackup/anakuzne/data/cv/target-segments/eu/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
         batch_size=args.batch_size, shuffle=False,
-        num_workers=args.num_workers, pin_memory=True, collate_fn=collate_custom)
+        num_workers=args.num_workers, pin_memory=True, collate_fn=collate_vae)
     valid_loader = torch.utils.data.DataLoader(valid_dataset,
         batch_size=args.batch_size, shuffle=False, drop_last=True,
-        num_workers=args.num_workers, pin_memory=True, collate_fn=collate_custom)
+        num_workers=args.num_workers, pin_memory=True, collate_fn=collate_vae)
     test_loader = torch.utils.data.DataLoader(test_dataset,
-        batch_size=16, shuffle=True, collate_fn=collate_custom)
+        batch_size=16, shuffle=True, collate_fn=collate_vae)
 
     print("DATA:", len(train_loader))
 
