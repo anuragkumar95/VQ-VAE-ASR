@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
+import torch.nn as nn
 
 from vq_modules import VectorQuantizedVAE, to_scalar
 from preproc import DataVAE, collate_vae
@@ -19,7 +20,10 @@ def train(data_loader, model, optimizer, args, writer):
 
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
-        print('x_:', x_tilde.shape, feats.shape)
+        feat_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
+                                feats.shape[2]-x_tilde.shape[2], 0))
+        feats = feat_pad(feats)
+        print("feats:", feats.shape)
 
         # Reconstruction loss
         loss_recons = F.mse_loss(x_tilde, feats)
