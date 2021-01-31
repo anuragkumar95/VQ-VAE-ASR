@@ -112,7 +112,7 @@ def collate_vae(data):
     for audio in data:
         audio, sr = torchaudio.load(audio)
         #Extract features...
-        mfcc = get_MFCC(audio)
+        mfcc = get_MFCC(audio).squeeze()
         deltas = get_MFCC(mfcc)
         ddeltas = get_deltas(deltas)
         print(mfcc.shape, deltas.shape, ddeltas.shape)
