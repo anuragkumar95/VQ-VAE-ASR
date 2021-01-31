@@ -15,7 +15,7 @@ from tensorboardX import SummaryWriter
 
 def train(data_loader, model, optimizer, args, writer):
     for batch in data_loader:
-        feats = batch['features'].to(args.device)
+        feats = batch.to(args.device)
 
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
@@ -41,7 +41,7 @@ def test(data_loader, model, args, writer):
     with torch.no_grad():
         loss_recons, loss_vq = 0., 0.
         for batch in data_loader:
-            feats = batch['features'].to(args.device)
+            feats = batch.to(args.device)
             x_tilde, z_e_x, z_q_x = model(feats)
             loss_recons += F.mse_loss(x_tilde, feats)
             loss_vq += F.mse_loss(z_q_x, z_e_x)
