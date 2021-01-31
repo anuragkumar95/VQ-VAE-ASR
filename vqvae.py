@@ -85,30 +85,16 @@ def main(args):
 
     # Fixed images for Tensorboard
 
-    print('TEST LOADER:', test_loader[0])
-    
-    fixed_images, _ = next(iter(test_loader))
-    fixed_grid = make_grid(fixed_images, nrow=8, range=(-1, 1), normalize=True)
-    writer.add_image('original', fixed_grid, 0)
-    
-
+    print('TEST LOADER:', test_loader)
 
     model = VectorQuantizedVAE(1, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
-    # Generate the samples first once
-    reconstruction = generate_samples(fixed_images, model, args)
-    grid = make_grid(reconstruction.cpu(), nrow=8, range=(-1, 1), normalize=True)
-    writer.add_image('reconstruction', grid, 0)
 
     best_loss = -1.
     for epoch in range(args.num_epochs):
         train(train_loader, model, optimizer, args, writer)
         loss, _ = test(valid_loader, model, args, writer)
-
-        reconstruction = generate_samples(fixed_images, model, args)
-        grid = make_grid(reconstruction.cpu(), nrow=8, range=(-1, 1), normalize=True)
-        writer.add_image('reconstruction', grid, epoch + 1)
 
         if (epoch == 0) or (loss < best_loss):
             best_loss = loss
