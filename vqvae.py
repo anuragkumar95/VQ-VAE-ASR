@@ -9,7 +9,7 @@ from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
 
 from vq_modules import VectorQuantizedVAE, to_scalar
-from preproc import Data, collate_custom
+from preproc import DataVAE, collate_vae
 
 from tensorboardX import SummaryWriter
 
@@ -86,11 +86,14 @@ def main(args):
     print("DATA:", len(train_loader))
 
     # Fixed images for Tensorboard
+    
     fixed_images, _ = next(iter(test_loader))
     fixed_grid = make_grid(fixed_images, nrow=8, range=(-1, 1), normalize=True)
     writer.add_image('original', fixed_grid, 0)
+    
 
-    model = VectorQuantizedVAE(num_channels, args.hidden_size, args.k).to(args.device)
+
+    model = VectorQuantizedVAE(1, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     # Generate the samples first once
