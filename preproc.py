@@ -107,6 +107,7 @@ def collate_vae(data):
 
     
     batch = []
+    print(data)
     paths = data["path"]
     maxlen = maxlen_fn(paths, get_MFCC)
 
