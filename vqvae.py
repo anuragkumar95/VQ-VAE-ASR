@@ -48,11 +48,15 @@ def test(data_loader, model, args, writer):
         for batch in data_loader:
             feats = batch.to(args.device)
             x_tilde, z_e_x, z_q_x = model(feats)
+            pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
+                                feats.shape[2]-x_tilde.shape[2], 0))
+            x_tilde = pred_pad(x_tilde)
             loss_recons += F.mse_loss(x_tilde, feats)
             loss_vq += F.mse_loss(z_q_x, z_e_x)
 
         loss_recons /= len(data_loader)
         loss_vq /= len(data_loader)
+        print("Validation Loss:", loss_recons.detach().cpu().numpy(), loss_vq.detach().cpu().numpy())
 
     # Logs
     writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
