@@ -8,6 +8,7 @@ import librosa
 from tqdm import tqdm
 import csv
 import pandas as pd
+from string import punctuation
 
 def collate_custom(data):
     '''
@@ -54,10 +55,11 @@ def collate_custom(data):
             "transcript":transcripts}
 
 class Data(data.Dataset):
-    def __init__(self, csv_path):
-        self.csv = pd.read_csv(csv_path)
-        self.path = self.csv['path']
-        self.transcripts = self.csv['transcript']
+    def __init__(self, csv_path, data_path):
+        self.csv = pd.read_csv(csv_path, sep='\t')
+        self.path = [os.path.join(data_path, fpath) for fpath in self.csv['path']]
+        self.transcripts = [''.join([char.lower() for char in sent if char not in punctuation])
+                            for sent in self.csv['sentence']]
 
     def __len__(self):
         return len(self.csv)
