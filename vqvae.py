@@ -23,7 +23,6 @@ def train(data_loader, model, optimizer, args, writer):
         pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
                                 feats.shape[2]-x_tilde.shape[2], 0))
         x_tilde = pred_pad(x_tilde)
-        print("preds:", x_tilde.shape)
 
         # Reconstruction loss
         loss_recons = F.mse_loss(x_tilde, feats)
@@ -34,6 +33,7 @@ def train(data_loader, model, optimizer, args, writer):
 
         loss = loss_recons + loss_vq + args.beta * loss_commit
         loss.backward()
+        print("Training loss:", loss.detach().cpu().numpy())
 
         # Logs
         writer.add_scalar('loss/train/reconstruction', loss_recons.item(), args.steps)
