@@ -107,11 +107,9 @@ def collate_vae(data):
 
     
     batch = []
-    print(data)
-    paths = data["path"]
-    maxlen = maxlen_fn(paths, get_MFCC)
+    maxlen = maxlen_fn(data, get_MFCC)
 
-    for audio in paths:
+    for audio in data:
         audio, sr = torchaudio.load(audio, sr=sample_rate)
         #Extract features...
         mfcc = get_MFCC(audio)
