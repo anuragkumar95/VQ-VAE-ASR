@@ -20,10 +20,10 @@ def train(data_loader, model, optimizer, args, writer):
 
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
-        feat_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
+        pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
                                 feats.shape[2]-x_tilde.shape[2], 0))
-        feats = feat_pad(feats)
-        print("feats:", feats.shape)
+        x_tilde = pred_pad(x_tilde)
+        print("preds:", x_tilde.shape)
 
         # Reconstruction loss
         loss_recons = F.mse_loss(x_tilde, feats)
