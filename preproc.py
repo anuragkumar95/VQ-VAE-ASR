@@ -37,10 +37,12 @@ def collate_custom(data):
     for audio in paths:
         audio, sr = torchaudio.load(audio, sr=sample_rate)
         #Extract features...
-        mfcc = get_MFCC(audio)
-        deltas = get_MFCC(audio)
-        ddeltas = get_deltas(deltas)
-        feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
+        #mfcc = get_MFCC(audio)
+        #deltas = get_MFCC(audio)
+        #ddeltas = get_deltas(deltas)
+        #feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
+        feature = torchaudio.transforms.MelSpectrogram()(audio)
+        print("Melspec:", feature.shape)
         #Calculate masks...
         mask = torch.ones(1, feature.shape[1])
         #Calculate padding...
