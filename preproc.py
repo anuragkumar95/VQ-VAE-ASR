@@ -101,6 +101,7 @@ def collate_vae(data):
         for f in paths:
             sig, sr = torchaudio.load(f)
             sig = fn(sig)
+            print(sig.shape)
             if sig.shape[1] > max_len:
                 max_len = sig.shape[2]
         return int(max_len)
@@ -117,7 +118,7 @@ def collate_vae(data):
         #feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
         feature = get_melspec(audio)
         batch_audio = nn.ZeroPad2d(padding=(0, maxlen-feature.shape[1], 0, 0))(feature)
-        print(feature.shape, batch_audio.shape, maxlen)
+        #print(feature.shape, batch_audio.shape, maxlen)
         batch.append(batch_audio)
 
     return torch.stack(batch).unsqueeze(1)
