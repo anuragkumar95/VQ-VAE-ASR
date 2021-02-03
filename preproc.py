@@ -41,7 +41,6 @@ def collate_custom(data):
         deltas = get_MFCC(audio)
         ddeltas = get_deltas(deltas)
         feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
-        Calculate masks...
         mask = torch.ones(1, feature.shape[1])
         #Calculate padding...
         mask = nn.ZeroPad2d(padding=(0, maxlen-feature.shape[1], 0, 0))(mask)
