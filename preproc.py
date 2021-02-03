@@ -116,7 +116,6 @@ def collate_vae(data):
         #ddeltas = get_deltas(deltas)
         #feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
         feature = get_melspec(audio)
-        print("Melspec:", feature.shape)
         batch_audio = nn.ZeroPad2d(padding=(0, maxlen-feature.shape[1], 0, 0))(feature)
         batch.append(batch_audio)
 
