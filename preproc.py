@@ -108,6 +108,7 @@ def collate_vae(data):
     
     batch = []
     maxlen = maxlen_fn(data, get_melspec)
+    print(maxlen)
     for audio in data:
         audio, sr = torchaudio.load(audio)
         #Extract features...
