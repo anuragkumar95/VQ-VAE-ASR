@@ -111,11 +111,11 @@ def collate_vae(data):
     for audio in data:
         audio, sr = torchaudio.load(audio)
         #Extract features...
-        #mfcc = get_MFCC(audio)
-        #deltas = get_deltas(mfcc)
-        #ddeltas = get_deltas(deltas)
-        #feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
-        feature = get_melspec(audio).squeeze(0)
+        mfcc = get_MFCC(audio)
+        deltas = get_deltas(mfcc)
+        ddeltas = get_deltas(deltas)
+        feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
+        #feature = get_melspec(audio).squeeze(0)
         batch_audio = nn.ZeroPad2d(padding=(0, maxlen-feature.shape[1], 0, 0))(feature)
         #print(feature.shape, batch_audio.shape, maxlen)
         batch.append(batch_audio)
