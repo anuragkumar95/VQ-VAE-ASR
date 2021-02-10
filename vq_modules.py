@@ -70,6 +70,17 @@ class VAE(nn.Module):
         x_tilde = self.decoder(q_z_x.rsample())
         return x_tilde, kl_div
 
+class VAE_Audio(nn.Module):
+    def __init__(self, num_layers=6):
+        super().__init__()
+        self.conv = nn.ModuleList()
+        for i in range(num_layers):
+            self.conv.append(nn.Conv1D(in_channels=1, 
+                                       out_channels=1, 
+                                       stride=2, 
+                                       kernel_size=4))
+
+
 
 class VQEmbedding(nn.Module):
     def __init__(self, K, D):
