@@ -2,6 +2,9 @@
 Credit: https://github.com/ritheshkumar95/pytorch-vqvae
 '''
 
+import sys
+sys.path.insert(1, '../pytorch-wavenet/') 
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,6 +12,10 @@ from torch.distributions.normal import Normal
 from torch.distributions import kl_divergence
 
 from vq_funcs import vq, vq_st
+from encoder import Encoder
+from wavenet_model import *
+
+
 
 def to_scalar(arr):
     if type(arr) == list:
@@ -125,6 +132,7 @@ class ResBlock(nn.Module):
 class VectorQuantizedVAE(nn.Module):
     def __init__(self, input_dim, dim, K=512):
         super().__init__()
+        '''
         self.encoder = nn.Sequential(
             nn.Conv2d(input_dim, dim, 4, 2, 1),
             nn.BatchNorm2d(dim),
@@ -133,6 +141,8 @@ class VectorQuantizedVAE(nn.Module):
             ResBlock(dim),
             ResBlock(dim),
         )
+        '''
+        self.encoder = Encoder(input_dim)
 
         self.codebook = VQEmbedding(K, dim)
 

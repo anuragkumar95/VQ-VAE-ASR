@@ -58,7 +58,7 @@ class Dense(nn.Module):
         return x
         
 class Encoder(nn.Module):
-    def __init__(self, in_dim, out_dim):
+    def __init__(self, in_dim):
         super().__init__()
         self.conv_pre = Conv(layers=1, stride=1, kernel=3, in_dim=in_dim)
         self.conv_strided = Conv(layers=1, stride=2, kernel=4, residual=False)
