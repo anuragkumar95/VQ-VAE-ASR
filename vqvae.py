@@ -1,3 +1,4 @@
+ #!/usr/bin/env python -W ignore::DeprecationWarning
 '''
 Credit: https://github.com/ritheshkumar95/pytorch-vqvae
 '''
@@ -7,6 +8,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
+import torch.nn as nn
 
 from vq_modules import VectorQuantizedVAE, to_scalar
 from preproc import DataVAE, collate_vae
@@ -19,7 +21,9 @@ def train(data_loader, model, optimizer, args, writer):
 
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
-        print('x_:', x_tilde.shape, feats.shape)
+        pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
+                                feats.shape[2]-x_tilde.shape[2], 0))
+        x_tilde = pred_pad(x_tilde)
 
         # Reconstruction loss
         loss_recons = F.mse_loss(x_tilde, feats)
@@ -30,6 +34,7 @@ def train(data_loader, model, optimizer, args, writer):
 
         loss = loss_recons + loss_vq + args.beta * loss_commit
         loss.backward()
+        print("Training loss:", loss.detach().cpu().numpy())
 
         # Logs
         writer.add_scalar('loss/train/reconstruction', loss_recons.item(), args.steps)
@@ -44,11 +49,15 @@ def test(data_loader, model, args, writer):
         for batch in data_loader:
             feats = batch.to(args.device)
             x_tilde, z_e_x, z_q_x = model(feats)
+            pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
+                                feats.shape[2]-x_tilde.shape[2], 0))
+            x_tilde = pred_pad(x_tilde)
             loss_recons += F.mse_loss(x_tilde, feats)
             loss_vq += F.mse_loss(z_q_x, z_e_x)
 
         loss_recons /= len(data_loader)
         loss_vq /= len(data_loader)
+        print("Validation Loss:", loss_recons.detach().cpu().numpy(), loss_vq.detach().cpu().numpy())
 
     # Logs
     writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
@@ -66,13 +75,13 @@ def main(args):
     writer = SummaryWriter('./logs/{0}'.format(args.output_folder))
     save_filename = './models/{0}'.format(args.output_folder)
     
-    train_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/train.tsv',
-                         '/nobackup/anakuzne/data/cv/target-segments/eu/clips/')
+    train_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
+                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
 
-    valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/dev.tsv',
-                        '/nobackup/anakuzne/data/cv/target-segments/eu/clips/')
-    test_dataset = DataVAE('/nobackup/anakuzne/data/cv/target-segments/eu/test.tsv',
-                         '/nobackup/anakuzne/data/cv/target-segments/eu/clips/')
+    valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
+                        '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    test_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/test.tsv',
+                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
@@ -86,7 +95,6 @@ def main(args):
 
     # Fixed images for Tensorboard
 
-    print('TEST LOADER:', test_loader)
 
     model = VectorQuantizedVAE(1, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)

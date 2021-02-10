@@ -41,7 +41,6 @@ def collate_custom(data):
         deltas = get_MFCC(audio)
         ddeltas = get_deltas(deltas)
         feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
-        #Calculate masks...
         mask = torch.ones(1, feature.shape[1])
         #Calculate padding...
         mask = nn.ZeroPad2d(padding=(0, maxlen-feature.shape[1], 0, 0))(mask)
@@ -95,6 +94,7 @@ def collate_vae(data):
                                           n_mfcc=13,
                                           log_mels=True)
     get_deltas = torchaudio.transforms.ComputeDeltas()
+    get_melspec = torchaudio.transforms.MelSpectrogram()
 
     def maxlen_fn(paths, fn):
         max_len=0
@@ -107,7 +107,7 @@ def collate_vae(data):
 
     
     batch = []
-    maxlen = maxlen_fn(data, get_MFCC)
+    maxlen = maxlen_fn(data, get_melspec)
     for audio in data:
         audio, sr = torchaudio.load(audio)
         #Extract features...
@@ -115,7 +115,9 @@ def collate_vae(data):
         deltas = get_deltas(mfcc)
         ddeltas = get_deltas(deltas)
         feature = torch.cat([mfcc, deltas, ddeltas], dim=1).squeeze(0)
+        #feature = get_melspec(audio).squeeze(0)
         batch_audio = nn.ZeroPad2d(padding=(0, maxlen-feature.shape[1], 0, 0))(feature)
+        #print(feature.shape, batch_audio.shape, maxlen)
         batch.append(batch_audio)
 
     return torch.stack(batch).unsqueeze(1)
