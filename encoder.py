@@ -10,8 +10,9 @@ class Residual(nn.Module):
         self.layer = layer
 
     def forward(self, x):
-        print(x.shape, self.layer(x).shape)
-        return x + self.layer(x)
+        x_i = self.layer(x)
+        print(x.shape, x_i.shape)
+        return x
 
 class Conv(nn.Module):
     def __init__(self, layers, stride, kernel, in_dim=None, residual=True):
