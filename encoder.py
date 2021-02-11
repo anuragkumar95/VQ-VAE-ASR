@@ -70,4 +70,6 @@ class Encoder(nn.Module):
         x = self.conv_strided(x)
         x = self.conv_post(x)
         x = self.dense(x)
+        print("DENSE", x.shape)
+
         return x
