@@ -10,6 +10,8 @@ class Residual(nn.Module):
         self.layer = layer
 
     def forward(self, x):
+        print(x.shape)
+        print(isinstance(self.layer, nn.Conv2D))
         x_i = self.layer(x)
         print(x.shape, x_i.shape)
         return x
@@ -31,9 +33,9 @@ class Conv(nn.Module):
                               kernel_size=kernel,
                               stride=stride)
             if residual:
-                self.cnvs.append(Residual(layer))
-            else:
-                self.cnvs.append(layer)
+                layer = Residual(layer)
+            self.cnvs.append(layer)
+        
         self.relu = nn.ReLU()
 
     def forward(self, x):
