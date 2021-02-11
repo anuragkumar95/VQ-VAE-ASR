@@ -11,7 +11,7 @@ class Residual(nn.Module):
 
     def forward(self, x):
         print(x.shape)
-        print(isinstance(self.layer, nn.Conv2D))
+        print(isinstance(self.layer, nn.Conv2d))
         x_i = self.layer(x)
         print(x.shape, x_i.shape)
         return x
