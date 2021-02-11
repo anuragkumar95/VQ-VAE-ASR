@@ -22,14 +22,14 @@ class Conv(nn.Module):
         self.cnvs = nn.ModuleList()
         if in_dim:
             self.input_layer = nn.Conv2d(in_channels=in_dim, 
-                                         out_channels=768,
+                                         out_channels=128,
                                          kernel_size=kernel,
                                          stride=stride)
         else:
             self.input_layer=None
         for i in range(layers):
-            layer = nn.Conv2d(in_channels=768, 
-                              out_channels=768,
+            layer = nn.Conv2d(in_channels=128, 
+                              out_channels=128,
                               kernel_size=kernel,
                               stride=stride)
             if residual:
@@ -53,7 +53,7 @@ class Dense(nn.Module):
         self.dense = nn.ModuleList()
         self.relu = nn.ReLU()
         for i in range(layers):
-            self.dense.append(Residual(nn.Linear(in_features=768, out_features=768)))
+            self.dense.append(Residual(nn.Linear(in_features=128, out_features=128)))
         
     def forward(self, x):
         for layer in self.dense:
