@@ -49,7 +49,7 @@ class Dense(nn.Module):
         self.dense = nn.ModuleList()
         self.relu = nn.ReLU()
         for i in range(layers):
-            self.dense.append(Residual(nn.Linear(in_channels=768, out_channels=768)))
+            self.dense.append(Residual(nn.Linear(in_features=768, out_features=768)))
         
     def forward(self, x):
         for layer in self.dense:
