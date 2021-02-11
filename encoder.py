@@ -10,6 +10,7 @@ class Residual(nn.Module):
         self.layer = layer
 
     def forward(self, x):
+        print(x.shape, self.layer(x).shape)
         return x + self.layer(x)
 
 class Conv(nn.Module):
