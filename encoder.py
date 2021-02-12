@@ -27,7 +27,8 @@ class Conv(nn.Module):
             layer = nn.Conv2d(in_channels=768, 
                               out_channels=768,
                               kernel_size=kernel,
-                              stride=stride)
+                              stride=stride,
+                              padding=1)
             if residual:
                 self.cnvs.append(Residual(layer))
             else:
