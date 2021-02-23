@@ -13,6 +13,7 @@ from torch.distributions import kl_divergence
 
 from vq_funcs import vq, vq_st
 from encoder import Encoder
+from decoder import Decoder
 from wavenet_model import *
 
 
@@ -77,17 +78,6 @@ class VAE(nn.Module):
         x_tilde = self.decoder(q_z_x.rsample())
         return x_tilde, kl_div
 
-class VAE_Audio(nn.Module):
-    def __init__(self, num_layers=6):
-        super().__init__()
-        self.conv = nn.ModuleList()
-        for i in range(num_layers):
-            self.conv.append(nn.Conv1D(in_channels=1, 
-                                       out_channels=1, 
-                                       stride=2, 
-                                       kernel_size=4))
-
-
 
 class VQEmbedding(nn.Module):
     def __init__(self, K, D):
@@ -142,10 +132,10 @@ class VectorQuantizedVAE(nn.Module):
             ResBlock(dim),
         )
         '''
-        self.encoder = Encoder(input_dim)
+        self.encoder = Encoder(in_dim=input_dim)
 
         self.codebook = VQEmbedding(K, dim)
-
+        '''
         self.decoder = nn.Sequential(
             ResBlock(dim),
             ResBlock(dim),
@@ -156,7 +146,8 @@ class VectorQuantizedVAE(nn.Module):
             nn.ConvTranspose2d(dim, input_dim, 4, 2, 1),
             nn.Tanh()
         )
-
+        '''
+        self.decoder = Decoder(in_dim=?):
         self.apply(weights_init)
 
     def encode(self, x):

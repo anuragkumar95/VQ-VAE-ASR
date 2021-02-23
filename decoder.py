@@ -8,7 +8,7 @@ import torch.nn as nn
 from wavenet_model import WaveNetModel, load_latest_model_from, load_to_cpu
 
 class Decoder(nn.Module):
-    def __init__(self, input_dim=None):
+    def __init__(self, in_dim=None):
         super().__init__()
         self.model = WaveNetModel(classes=input_dim)
 
