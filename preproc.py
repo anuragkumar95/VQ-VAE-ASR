@@ -120,4 +120,4 @@ def collate_vae(data):
         #print(feature.shape, batch_audio.shape, maxlen)
         batch.append(batch_audio)
 
-    return torch.stack(batch).unsqueeze(1)
+    return torch.stack(batch)
