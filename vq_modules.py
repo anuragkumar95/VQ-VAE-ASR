@@ -147,7 +147,7 @@ class VectorQuantizedVAE(nn.Module):
             nn.Tanh()
         )
         '''
-        self.decoder = Decoder(in_dim=?):
+        self.decoder = Decoder(in_dim=dim)
         self.apply(weights_init)
 
     def encode(self, x):

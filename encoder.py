@@ -54,6 +54,7 @@ class Dense(nn.Module):
         
     def forward(self, x):
         for layer in self.dense:
+            print(x.shape)
             x = layer(x)
             x = self.relu(x)
         return x
@@ -65,6 +66,7 @@ class Encoder(nn.Module):
         self.conv_strided = Conv(layers=1, stride=2, kernel=4, residual=False)
         self.conv_post = Conv(layers=2, stride=1, kernel=3)
         self.dense = Dense(layers=4)
+        self.flatten = nn.Flatten()
 
     def forward(self, x):
         x = self.conv_pre(x)
