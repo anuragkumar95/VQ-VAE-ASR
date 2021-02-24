@@ -3,6 +3,49 @@ import numpy as np
 import os
 import sys
 
+#https://github.com/swasun/VQ-VAE-Speech/blob/master/src/modules/jitter.py
+
+
+class Jitter(nn.Module):
+    """
+    Jitter implementation from [Chorowski et al., 2019].
+    During training, each latent vector can replace either one or both of
+    its neighbors. As in dropout, this prevents the model from
+    relying on consistency across groups of tokens. Additionally,
+    this regularization also promotes latent representation stability
+    over time: a latent vector extracted at time step t must strive
+    to also be useful at time steps t − 1 or t + 1.
+    """
+
+    def __init__(self, probability=0.12):
+        super(Jitter, self).__init__()
+
+        self._probability = probability
+
+    def forward(self, quantized):
+        original_quantized = quantized.detach().clone()
+        length = original_quantized.size(2)
+        for i in range(length):
+            """
+            Each latent vector is replace with either of its neighbors with a certain probability
+            (0.12 from the paper).
+            """
+            replace = [True, False][np.random.choice([1, 0], p=[self._probability, 1 - self._probability])]
+            if replace:
+                if i == 0:
+                    neighbor_index = i + 1
+                elif i == length - 1:
+                    neighbor_index = i - 1
+                else:
+                    """
+                    "We independently sample whether it is to
+                    be replaced with the token right after
+                    or before it."
+                    """
+                    neighbor_index = i + np.random.choice([-1, 1], p=[0.5, 0.5])
+                quantized[:, :, i] = original_quantized[:, :, neighbor_index]
+
+        return quantized
 
 class Residual(nn.Module):
     def __init__(self, layer):
@@ -13,12 +56,12 @@ class Residual(nn.Module):
         return x + self.layer(x)
 
 class Conv(nn.Module):
-    def __init__(self, layers, stride, kernel, in_dim=None, residual=True, transpose=False):
+    def __init__(self, layers, stride, kernel, hid_dim, in_dim=None, out_dim=None, residual=True, transpose=False):
         super().__init__()
         self.cnvs = nn.ModuleList()
         if in_dim:
             self.input_layer = nn.Conv1d(in_channels=in_dim, 
-                                         out_channels=128,
+                                         out_channels=hid_dim,
                                          kernel_size=kernel,
                                          stride=stride,
                                          padding=1)
@@ -28,9 +71,9 @@ class Conv(nn.Module):
         for i in range(layers-1):
             if transpose:
                 if i == layers-2:
-                    out_ch = 39
+                    out_ch = out_dim
                 else:
-                    out_ch = 128
+                    out_ch = hid_dim
                 layer = nn.ConvTranspose1d(in_channels=128, 
                                            out_channels=out_ch,
                                            kernel_size=kernel,

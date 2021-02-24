@@ -132,7 +132,7 @@ class VectorQuantizedVAE(nn.Module):
             ResBlock(dim),
         )
         '''
-        self.encoder = Encoder(in_dim=input_dim)
+        self.encoder = Encoder(in_dim=input_dim, hid_dim=dim)
 
         self.codebook = VQEmbedding(K, dim)
         '''
@@ -147,7 +147,7 @@ class VectorQuantizedVAE(nn.Module):
             nn.Tanh()
         )
         '''
-        self.decoder = Decoder(in_dim=dim)
+        self.decoder = Decoder(in_dim=dim, hid_dim=dim, out_dim=input_dim)
         self.apply(weights_init)
 
     def encode(self, x):

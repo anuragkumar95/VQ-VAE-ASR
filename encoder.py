@@ -6,11 +6,11 @@ from modules import Conv, Dense
 
 
 class Encoder(nn.Module):
-    def __init__(self, in_dim):
+    def __init__(self, in_dim, hid_dim):
         super().__init__()
-        self.conv_pre = Conv(layers=2, stride=1, kernel=3, in_dim=in_dim)
-        self.conv_strided = Conv(layers=1, stride=2, kernel=4, residual=False)
-        self.conv_post = Conv(layers=2, stride=1, kernel=3)
+        self.conv_pre = Conv(layers=2, stride=1, kernel=3, hid_dim = hid_dim, in_dim=in_dim)
+        self.conv_strided = Conv(layers=1, stride=2, kernel=4, hid_dim = hid_dim, residual=False)
+        self.conv_post = Conv(layers=2, stride=1, kernel=3, hid_dim = hid_dim)
         self.dense = Dense(layers=4)
         self.flatten = nn.Flatten()
 
