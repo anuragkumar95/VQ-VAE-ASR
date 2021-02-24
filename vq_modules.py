@@ -162,8 +162,9 @@ class VectorQuantizedVAE(nn.Module):
 
     def forward(self, x):
         z_e_x = self.encoder(x)
-        print("Encoder out:", z_e_x.shape)
+        z_e_x = z_e_x.unsqueeze(1)
         z_q_x_st, z_q_x = self.codebook.straight_through(z_e_x)
+        z_q_x_st = z_q_x_st.squeeze(1).permute(0,2,1).contiguous()
         x_tilde = self.decoder(z_q_x_st)
         return x_tilde, z_e_x, z_q_x
 

@@ -21,7 +21,8 @@ class VectorQuantization(Function):
                 inputs_flatten, codebook.t(), alpha=-2.0, beta=1.0)
 
             _, indices_flatten = torch.min(distances, dim=1)
-            indices = indices_flatten.view(*inputs_size[:-1])
+            #indices = indices_flatten.view(*inputs_size[:-1])
+            indices = indices_flatten.view(*inputs_size[:2])
             ctx.mark_non_differentiable(indices)
 
             return indices
