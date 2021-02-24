@@ -96,11 +96,11 @@ def main(args):
     # Fixed images for Tensorboard
 
 
-    model = VectorQuantizedVAE(1, args.hidden_size, args.k).to(args.device)
+    model = VectorQuantizedVAE(39, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
 
-    best_loss = -1.
+    best_loss = -1
     for epoch in range(args.num_epochs):
         train(train_loader, model, optimizer, args, writer)
         loss, _ = test(valid_loader, model, args, writer)
