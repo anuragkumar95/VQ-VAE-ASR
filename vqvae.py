@@ -75,13 +75,13 @@ def main(args):
     writer = SummaryWriter('./logs/{0}'.format(args.output_folder))
     save_filename = './models/{0}'.format(args.output_folder)
     
-    train_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
-                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    train_dataset = DataVAE('/N/slate/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/train.tsv',
+                         '/N/slate/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
 
-    valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
-                        '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
-    test_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/test.tsv',
-                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    valid_dataset = DataVAE('/N/slate/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
+                        '/N/slate/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
+    test_dataset = DataVAE('/N/slate/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/test.tsv',
+                         '/N/slate/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
