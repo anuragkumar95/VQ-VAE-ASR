@@ -53,7 +53,6 @@ class Residual(nn.Module):
         self.layer = layer
 
     def forward(self, x):
-        print(x.shape)
         return x + self.layer(x)
 
 class Conv(nn.Module):
@@ -106,7 +105,6 @@ class Dense(nn.Module):
         super().__init__()
         self.dense = nn.ModuleList()
         self.relu = nn.ReLU()
-        print("HIDDEN:",hid_dim)
         for i in range(layers):
             self.dense.append(Residual(nn.Linear(in_features=hid_dim, out_features=hid_dim)))
         
