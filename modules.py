@@ -101,12 +101,12 @@ class Conv(nn.Module):
         return x
 
 class Dense(nn.Module):
-    def __init__(self, layers):
+    def __init__(self, layers, hid_dim):
         super().__init__()
         self.dense = nn.ModuleList()
         self.relu = nn.ReLU()
         for i in range(layers):
-            self.dense.append(Residual(nn.Linear(in_features=128, out_features=128)))
+            self.dense.append(Residual(nn.Linear(in_features=hid_dim, out_features=hid_dim)))
         
     def forward(self, x):
         for layer in self.dense:
