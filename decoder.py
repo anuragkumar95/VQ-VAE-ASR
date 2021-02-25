@@ -6,7 +6,7 @@ sys.path.insert(1, str(pathlib.Path(__file__).parent.absolute()) + '/pytorch-wav
 import numpy as np
 import torch
 import torch.nn as nn
-from wavenet_model import WaveNetModel, load_latest_model_from, load_to_cpu
+#from wavenet_model import WaveNetModel, load_latest_model_from, load_to_cpu
 from modules import Conv, Jitter
 
 '''
