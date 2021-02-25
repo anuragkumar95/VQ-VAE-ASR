@@ -14,7 +14,7 @@ from torch.distributions import kl_divergence
 from vq_funcs import vq, vq_st
 from encoder import Encoder
 from decoder import Decoder
-from wavenet_model import *
+#from wavenet_model import *
 
 
 
