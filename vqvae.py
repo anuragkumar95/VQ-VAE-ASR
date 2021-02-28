@@ -21,8 +21,8 @@ def train(data_loader, model, optimizer, args, writer):
 
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
-        pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
-                                feats.shape[2]-x_tilde.shape[2], 0))
+        pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[2]-x_tilde.shape[2], 
+                                feats.shape[1]-x_tilde.shape[1], 0))
         x_tilde = pred_pad(x_tilde)
 
         # Reconstruction loss

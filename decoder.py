@@ -27,7 +27,7 @@ class Decoder(nn.Module):
     def __init__(self, in_dim, hid_dim, out_dim):
         super().__init__()
         self.jitter = Jitter()
-        self.pre_conv = Conv(layers=1, stride=1, kernel=3, hid_dim = hid_dim, in_dim=in_dim)
+        self.pre_conv = Conv(layers=1, stride=1, kernel=3, hid_dim = hid_dim, in_dim=in_dim, residual=False)
         self.upsample = nn.Upsample(scale_factor=2)
         self.conv_mid = Conv(layers=2, stride=1, kernel=3, hid_dim = hid_dim)
         self.conv_post = Conv(layers=3, stride=1, kernel=3, hid_dim = hid_dim, out_dim=out_dim, residual=False, transpose=True)
