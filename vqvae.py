@@ -19,6 +19,8 @@ def train(data_loader, model, optimizer, args, writer):
     for batch in data_loader:
         feats = batch.to(args.device)
 
+        print("FEATS:", feats.shape)
+
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
         pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[2]-x_tilde.shape[2], 
