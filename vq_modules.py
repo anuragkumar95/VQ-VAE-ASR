@@ -122,7 +122,6 @@ class ResBlock(nn.Module):
 class VectorQuantizedVAE(nn.Module):
     def __init__(self, input_dim, dim, K=512):
         super().__init__()
-        '''
         self.encoder = nn.Sequential(
             nn.Conv2d(input_dim, dim, 4, 2, 1),
             nn.BatchNorm2d(dim),
@@ -131,11 +130,11 @@ class VectorQuantizedVAE(nn.Module):
             ResBlock(dim),
             ResBlock(dim),
         )
-        '''
-        self.encoder = Encoder(in_dim=input_dim, hid_dim=dim)
+
+        #self.encoder = Encoder(in_dim=input_dim, hid_dim=dim)
 
         self.codebook = VQEmbedding(K, dim)
-        '''
+
         self.decoder = nn.Sequential(
             ResBlock(dim),
             ResBlock(dim),
@@ -146,8 +145,8 @@ class VectorQuantizedVAE(nn.Module):
             nn.ConvTranspose2d(dim, input_dim, 4, 2, 1),
             nn.Tanh()
         )
-        '''
-        self.decoder = Decoder(in_dim=dim, hid_dim=dim, out_dim=input_dim)
+
+        #self.decoder = Decoder(in_dim=dim, hid_dim=dim, out_dim=input_dim)
         self.apply(weights_init)
 
     def encode(self, x):
