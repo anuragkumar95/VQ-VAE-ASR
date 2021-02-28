@@ -18,8 +18,8 @@ from tensorboardX import SummaryWriter
 def train(data_loader, model, optimizer, args, writer):
     for batch in data_loader:
         feats = batch.to(args.device)
-        feats = feats.unsqueeze(2)
-        print("FEATS:", feats.shape)
+        #feats = feats.unsqueeze(2)
+        #print("FEATS:", feats.shape)
 
         optimizer.zero_grad()
         x_tilde, z_e_x, z_q_x = model(feats)
