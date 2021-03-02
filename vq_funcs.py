@@ -9,6 +9,7 @@ class VectorQuantization(Function):
     @staticmethod
     def forward(ctx, inputs, codebook):
         with torch.no_grad():
+            inputs = inputs.permute(0, 3, 2, 1).contiguous()
             embedding_size = codebook.size(1)
             inputs_size = inputs.size()
             inputs_flatten = inputs.view(-1, embedding_size)
@@ -21,8 +22,8 @@ class VectorQuantization(Function):
                 inputs_flatten, codebook.t(), alpha=-2.0, beta=1.0)
 
             _, indices_flatten = torch.min(distances, dim=1)
-            #indices = indices_flatten.view(*inputs_size[:-1])
-            indices = indices_flatten.view(*inputs_size[:2])
+            print("Indices flatten:",indices_flatten.shape)
+            indices = indices_flatten.view(*inputs_size[:-1])
             ctx.mark_non_differentiable(indices)
 
             return indices
