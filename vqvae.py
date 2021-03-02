@@ -104,7 +104,7 @@ def main(args):
                         hid_dim=args.hidden_size, 
                         enc_dim=64, 
                         K=args.k).to(args.device)
-    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+    #model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
     #model = VectorQuantizedVAE(39, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
