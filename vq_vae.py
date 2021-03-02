@@ -59,7 +59,7 @@ class VectorQuantizer(nn.Module):
         inputs = inputs.permute(1, 2, 0).contiguous()
         input_shape = inputs.shape
         _, time, batch_size = input_shape
-        print(inputs.shape)
+
         # Flatten input
         flat_input = inputs.view(-1, self._embedding_dim)
 
@@ -117,12 +117,11 @@ class VectorQuantizer(nn.Module):
         It indicates how many codes are 'active' on average.
         """
         perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10))) # Exponential entropy
-        print(encodings.shape)
-        print(distances.shape)
+        
         #encodings.view(batch_size, -1, 64)
         # Convert quantized from BHWC -> BCHW
         return vq_loss, quantized.permute(2, 0, 1).contiguous(), \
-            perplexity, encodings, \
+            perplexity, encodings.view(batch_size, -1, 64), \
             distances.view(batch_size, time, -1), encoding_indices, \
             {'e_latent_loss': e_latent_loss.item(), 'q_latent_loss': q_latent_loss.item(),
             'commitment_loss': commitment_loss.item(), 'vq_loss': vq_loss.item()}, \
