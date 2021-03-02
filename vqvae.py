@@ -113,7 +113,7 @@ def main(args):
 
 
     best_loss = -1
-    f = open(args.logs+'results.txt', 'r')
+    f = open(args.logs+'results.txt', 'w')
     for epoch in range(args.num_epochs):
         train(train_loader, model, optimizer, args, writer, f)
         loss, _ = test(valid_loader, model, args, writer,f)
