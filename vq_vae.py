@@ -202,7 +202,7 @@ class VectorQuantizerEMA(nn.Module):
         inputs = inputs.permute(1, 2, 0).contiguous()
         input_shape = inputs.shape
         _, time, batch_size = input_shape
-        
+        print(inputs.shape)
         # Flatten input
         flat_input = inputs.view(-1, self._embedding_dim)
         
