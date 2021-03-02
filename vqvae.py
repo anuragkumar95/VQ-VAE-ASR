@@ -102,7 +102,7 @@ def main(args):
     # Fixed images for Tensorboard
 
     model = audio_vqvae(input_dim=39, 
-                        hid_dim=args.hidden_sze, 
+                        hid_dim=args.hidden_size, 
                         enc_dim=64, 
                         K=args.k).to(args.device)
     #model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
