@@ -163,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument('--device', type=str, default='cpu',
         help='set the device (cpu or cuda, default: cpu)')
 
-    parser.add_argument('--logs', type=str , default='./logs/')
+    parser.add_argument('--logs', type=str , default='logs/')
 
     args = parser.parse_args()
 
