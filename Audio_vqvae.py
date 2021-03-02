@@ -19,12 +19,10 @@ class audio_vqvae(nn.Module):
         z = self.encoder(x)
         print("Z:", z.shape)
         vq_loss, quantized, perplexity, _, _, encoding_indices, losses, _, _, _, concatenated_quantized = self.vq(z)
-        quantized = quantized.permute(0,2,1)
+        print("Z:", quantized.shape)
         reconstructed = self.decoder(quantized)
         print("reconstructed_x:", reconstructed.shape)
         input_features_size = x.size(2)
         output_features_size = reconstructed.size(2)
 
         return reconstructed, vq_loss, losses, perplexity, encoding_indices, concatenated_quantized
-
-    
