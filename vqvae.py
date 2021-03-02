@@ -19,6 +19,8 @@ from tensorboardX import SummaryWriter
 def train(data_loader, model, optimizer, args, writer):
     for batch in data_loader:
         feats = batch.to(args.device)
+        #feats = feats.unsqueeze(2)
+        #print("FEATS:", feats.shape)
 
         optimizer.zero_grad()
         x_tilde, vq_loss, losses, perplexity, \
@@ -77,13 +79,13 @@ def main(args):
     writer = SummaryWriter('./logs/{0}'.format(args.output_folder))
     save_filename = './models/{0}'.format(args.output_folder)
     
-    train_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/train.tsv',
-                         '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
+    train_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
+                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
 
-    valid_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
-                        '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
-    test_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/test.tsv',
-                         '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
+    valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
+                        '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    test_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/test.tsv',
+                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
