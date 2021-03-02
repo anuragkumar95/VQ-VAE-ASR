@@ -17,7 +17,7 @@ class audio_vqvae(nn.Module):
     
     def forward(self, x):
         z = self.encoder(x)
-        z = z.permute(0,2,1)
+        #z = z.permute(0,2,1)
         print("Z:", z.shape)
         vq_loss, quantized, perplexity, _, _, encoding_indices, losses, _, _, _, concatenated_quantized = self.vq(z)
         quantized = quantized.permute(0,2,1)
