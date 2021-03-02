@@ -53,16 +53,17 @@ def test(data_loader, model, args, writer):
         loss_recons, loss_vq = 0., 0.
         for batch in data_loader:
             feats = batch.to(args.device)
-            x_tilde, z_e_x, z_q_x = model(feats)
-            pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
-                                feats.shape[2]-x_tilde.shape[2], 0))
+            x_tilde, vq_loss, losses, perplexity, \
+            encoding_indices, concatenated_quantized = model(feats)
+            pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[2]-x_tilde.shape[2], 
+                                    feats.shape[1]-x_tilde.shape[1], 0))
             x_tilde = pred_pad(x_tilde)
             loss_recons += F.mse_loss(x_tilde, feats)
-            loss_vq += F.mse_loss(z_q_x, z_e_x)
+            #loss_vq += F.mse_loss(z_q_x, z_e_x)
 
         loss_recons /= len(data_loader)
-        loss_vq /= len(data_loader)
-        print("Validation Loss:", loss_recons.detach().cpu().numpy(), loss_vq.detach().cpu().numpy())
+        vq_loss /= len(data_loader)
+        print("Validation Loss:", loss_recons.detach().cpu().numpy(), vq_loss.detach().cpu().numpy())
 
     # Logs
     writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
@@ -101,7 +102,7 @@ def main(args):
     # Fixed images for Tensorboard
 
     model = audio_vqvae(input_dim=39, 
-                        hid_dim=args.hidden_size, 
+                        hid_dim=args.hidden_sze, 
                         enc_dim=64, 
                         K=args.k).to(args.device)
     #model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
