@@ -34,7 +34,7 @@ def train(data_loader, model, optimizer, args, writer):
         # Vector quantization objective
         #loss_vq = F.mse_loss(z_q_x, z_e_x.detach())
         # Commitment objective
-        #loss_commit = F.mse_loss(z_e_x, z_q_x.detach())
+        #loss_commit = F.mse_loss(z_ex, z_q_x.detach())
 
         loss = loss_recons + vq_loss #+ args.beta * loss_commit
         loss.backward()
@@ -79,13 +79,13 @@ def main(args):
     writer = SummaryWriter('./logs/{0}'.format(args.output_folder))
     save_filename = './models/{0}'.format(args.output_folder)
     
-    train_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
-                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    train_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/train.tsv',
+                         '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
 
-    valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
-                        '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
-    test_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/test.tsv',
-                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    valid_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
+                        '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
+    test_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/test.tsv',
+                         '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
