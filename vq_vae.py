@@ -120,7 +120,7 @@ class VectorQuantizer(nn.Module):
 
         # Convert quantized from BHWC -> BCHW
         return vq_loss, quantized.permute(2, 0, 1).contiguous(), \
-            perplexity, encodings.view(batch_size, time, -1), \
+            perplexity, encodings.view(batch_size, -1, 64), \
             distances.view(batch_size, time, -1), encoding_indices, \
             {'e_latent_loss': e_latent_loss.item(), 'q_latent_loss': q_latent_loss.item(),
             'commitment_loss': commitment_loss.item(), 'vq_loss': vq_loss.item()}, \
