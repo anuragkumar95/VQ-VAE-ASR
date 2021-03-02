@@ -17,7 +17,7 @@ from preproc import DataVAE, collate_vae
 
 from tensorboardX import SummaryWriter
 
-def train(data_loader, model, optimizer, args, writer):
+def train(data_loader, model, optimizer, args, writer, file_):
     for batch in data_loader:
         feats = batch.to(args.device)
         #feats = feats.unsqueeze(2)
@@ -44,9 +44,10 @@ def train(data_loader, model, optimizer, args, writer):
         # Logs
         writer.add_scalar('loss/train/reconstruction', loss_recons.item(), args.steps)
         #writer.add_scalar('loss/train/quantization', loss_vq.item(), args.steps)
-
+        
         optimizer.step()
         args.steps += 1
+        file_.write("step "+str(args.step)+":"+str(loss.detach().cpu().numpy())+'\n')
 
 def test(data_loader, model, args, writer):
     with torch.no_grad():
@@ -64,10 +65,11 @@ def test(data_loader, model, args, writer):
         loss_recons /= len(data_loader)
         vq_loss /= len(data_loader)
         print("Validation Loss:", loss_recons.detach().cpu().numpy(), vq_loss.detach().cpu().numpy())
+        file_.write("Validation:"+str(loss.detach().cpu().numpy())+'\n')
 
     # Logs
-    writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
-    writer.add_scalar('loss/test/quantization', loss_vq.item(), args.steps)
+    #writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
+    #writer.add_scalar('loss/test/quantization', loss_vq.item(), args.steps)
 
     return loss_recons.item(), loss_vq.item()
 
@@ -111,9 +113,10 @@ def main(args):
 
 
     best_loss = -1
+    f = open(args.logs+'results.txt', 'r')
     for epoch in range(args.num_epochs):
-        train(train_loader, model, optimizer, args, writer)
-        loss, _ = test(valid_loader, model, args, writer)
+        train(train_loader, model, optimizer, args, writer, f)
+        loss, _ = test(valid_loader, model, args, writer,f)
 
         if (epoch == 0) or (loss < best_loss):
             best_loss = loss
@@ -121,6 +124,7 @@ def main(args):
                 torch.save(model.state_dict(), f)
         with open('{0}/model_{1}.pt'.format(save_filename, epoch + 1), 'wb') as f:
             torch.save(model.state_dict(), f)
+    f.close()
 
 if __name__ == '__main__':
     import argparse
@@ -158,6 +162,8 @@ if __name__ == '__main__':
         help='number of workers for trajectories sampling (default: {0})'.format(mp.cpu_count() - 1))
     parser.add_argument('--device', type=str, default='cpu',
         help='set the device (cpu or cuda, default: cpu)')
+
+    parser.add_argument('--logs', type=str , default='./logs/')
 
     args = parser.parse_args()
 
