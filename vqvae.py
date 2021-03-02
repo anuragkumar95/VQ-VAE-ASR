@@ -47,7 +47,7 @@ def train(data_loader, model, optimizer, args, writer, file_):
         
         optimizer.step()
         args.steps += 1
-        file_.write("step "+str(args.step)+":"+str(loss.detach().cpu().numpy())+'\n')
+        file_.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
 
 def test(data_loader, model, args, writer):
     with torch.no_grad():
