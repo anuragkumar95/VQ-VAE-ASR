@@ -64,14 +64,14 @@ def test(data_loader, model, args, writer):
 
         loss_recons /= len(data_loader)
         vq_loss /= len(data_loader)
-        print("Validation Loss:", loss_recons.detach().cpu().numpy(), vq_loss.detach().cpu().numpy())
+        print("Validation Loss:", loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())
         file_.write("Validation:"+str(loss.detach().cpu().numpy())+'\n')
 
     # Logs
     #writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
     #writer.add_scalar('loss/test/quantization', loss_vq.item(), args.steps)
-
-    return loss_recons.item(), loss_vq.item()
+    return loss_recons, vq_loss
+    #return loss_recons.item(), loss_vq.item()
 
 def generate_samples(feats, model, args):
     with torch.no_grad():
