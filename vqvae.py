@@ -10,6 +10,7 @@ from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
 import torch.nn as nn
 from Audio_vqvae import audio_vqvae
+from torch.nn import DataParallel
 
 from vq_modules import VectorQuantizedVAE, to_scalar
 from preproc import DataVAE, collate_vae
@@ -102,8 +103,9 @@ def main(args):
     model = audio_vqvae(input_dim=39, 
                         hid_dim=args.hidden_size, 
                         enc_dim=64, 
-                        K=args.K).to(args.device)
-    model = VectorQuantizedVAE(39, args.hidden_size, args.k).to(args.device)
+                        K=args.k).to(args.device)
+    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+    #model = VectorQuantizedVAE(39, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
 
