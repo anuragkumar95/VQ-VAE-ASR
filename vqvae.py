@@ -49,7 +49,7 @@ def train(data_loader, model, optimizer, args, writer, file_):
         args.steps += 1
         file_.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
 
-def test(data_loader, model, args, writer, f):
+def test(data_loader, model, args, writer, file_):
     with torch.no_grad():
         loss_recons, loss_vq = 0., 0.
         for batch in data_loader:
@@ -61,7 +61,7 @@ def test(data_loader, model, args, writer, f):
             x_tilde = pred_pad(x_tilde)
             loss_recons += F.mse_loss(x_tilde, feats)
             #print(loss_recons)
-            #loss_vq += F.mse_loss(z_q_x, z_e_x)
+            loss_vq += vq_loss
 
         loss_recons /= len(data_loader)
         vq_loss /= len(data_loader)
