@@ -66,7 +66,7 @@ def test(data_loader, model, args, writer, file_):
         loss_recons /= len(data_loader)
         vq_loss /= len(data_loader)
         print("Validation Loss:", loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())
-        file_.write("Validation:"+str(loss.detach().cpu().numpy())+'\n')
+        file_.write("Validation:"+str(loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())+'\n')
 
     # Logs
     #writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
