@@ -49,7 +49,7 @@ def train(data_loader, model, optimizer, args, writer, file_):
         args.steps += 1
         file_.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
 
-def test(data_loader, model, args, writer):
+def test(data_loader, model, args, writer, f):
     with torch.no_grad():
         loss_recons, loss_vq = 0., 0.
         for batch in data_loader:
@@ -115,7 +115,7 @@ def main(args):
     best_loss = -1
     f = open(args.logs+'results.txt', 'w')
     for epoch in range(args.num_epochs):
-        train(train_loader, model, optimizer, args, writer, f)
+        #train(train_loader, model, optimizer, args, writer, f)
         loss, _ = test(valid_loader, model, args, writer,f)
 
         if (epoch == 0) or (loss < best_loss):
