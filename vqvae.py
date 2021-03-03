@@ -60,7 +60,7 @@ def test(data_loader, model, args, writer, f):
                                     feats.shape[1]-x_tilde.shape[1], 0))
             x_tilde = pred_pad(x_tilde)
             loss_recons += F.mse_loss(x_tilde, feats)
-            print(loss_recons)
+            #print(loss_recons)
             #loss_vq += F.mse_loss(z_q_x, z_e_x)
 
         loss_recons /= len(data_loader)
@@ -116,7 +116,7 @@ def main(args):
     best_loss = -1
     f = open(args.logs+'results.txt', 'w')
     for epoch in range(args.num_epochs):
-        #train(train_loader, model, optimizer, args, writer, f)
+        train(train_loader, model, optimizer, args, writer, f)
         loss, _ = test(valid_loader, model, args, writer,f)
 
         if (epoch == 0) or (loss < best_loss):
