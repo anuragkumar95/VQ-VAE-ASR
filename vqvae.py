@@ -60,6 +60,7 @@ def test(data_loader, model, args, writer, f):
                                     feats.shape[1]-x_tilde.shape[1], 0))
             x_tilde = pred_pad(x_tilde)
             loss_recons += F.mse_loss(x_tilde, feats)
+            print(loss_recons)
             #loss_vq += F.mse_loss(z_q_x, z_e_x)
 
         loss_recons /= len(data_loader)
