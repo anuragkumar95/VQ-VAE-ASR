@@ -17,8 +17,8 @@ from preproc import DataVAE, collate_vae
 
 from tensorboardX import SummaryWriter
 
-def train(data_loader, model, optimizer, args, writer, file_):
-    for batch in data_loader:
+def train(data_loader, model, optimizer, args, writer):
+    for batch in data_loader[:1]:
         feats = batch.to(args.device)
         #feats = feats.unsqueeze(2)
         #print("FEATS:", feats.shape)
@@ -51,10 +51,10 @@ def train(data_loader, model, optimizer, args, writer, file_):
         f.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
         f.close()
 
-def test(data_loader, model, args, writer, file_):
+def test(data_loader, model, args, writer):
     with torch.no_grad():
         loss_recons, loss_vq = 0., 0.
-        for batch in data_loader:
+        for batch in data_loader[:1]:
             feats = batch.to(args.device)
             x_tilde, vq_loss, losses, perplexity, \
             encoding_indices, concatenated_quantized = model(feats)
@@ -119,8 +119,8 @@ def main(args):
     best_loss = -1
     
     for epoch in range(args.num_epochs):
-        train(train_loader, model, optimizer, args, writer, f)
-        loss, _ = test(valid_loader, model, args, writer,f)
+        train(train_loader, model, optimizer, args, writer)
+        loss, _ = test(valid_loader, model, args, writer)
 
         if (epoch == 0) or (loss < best_loss):
             best_loss = loss
