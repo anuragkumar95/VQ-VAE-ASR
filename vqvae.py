@@ -49,7 +49,7 @@ def train(data_loader, model, optimizer, args, writer):
         
         optimizer.step()
         args.steps += 1
-        f = open(args.logs+'results.txt', 'a+')
+        f = open(args.logs+'results_train.txt', 'a+')
         f.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
         f.close()
 
@@ -69,10 +69,9 @@ def test(data_loader, model, args, writer):
             #print(loss_recons)
             loss_vq += vq_loss
 
-        loss_recons /= len(data_loader)
         vq_loss /= len(data_loader)
         print("Validation Loss:", loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())
-        f = open(args.logs+'results.txt', 'a+')
+        f = open(args.logs+'results_val.txt', 'a+')
         f.write("Validation:"+str(loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())+'\n')
         f.close()
     # Logs
