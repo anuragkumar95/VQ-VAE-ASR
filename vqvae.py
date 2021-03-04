@@ -47,7 +47,9 @@ def train(data_loader, model, optimizer, args, writer, file_):
         
         optimizer.step()
         args.steps += 1
-        file_.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
+        f = open(args.logs+'results.txt', 'w+')
+        f.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
+        f.close()
 
 def test(data_loader, model, args, writer, file_):
     with torch.no_grad():
@@ -66,8 +68,9 @@ def test(data_loader, model, args, writer, file_):
         loss_recons /= len(data_loader)
         vq_loss /= len(data_loader)
         print("Validation Loss:", loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())
-        file_.write("Validation:"+str(loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())+'\n')
-
+        f = open(args.logs+'results.txt', 'w+')
+        f.write("Validation:"+str(loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())+'\n')
+        f.close()
     # Logs
     #writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
     #writer.add_scalar('loss/test/quantization', loss_vq.item(), args.steps)
@@ -114,7 +117,7 @@ def main(args):
 
 
     best_loss = -1
-    f = open(args.logs+'results.txt', 'w')
+    
     for epoch in range(args.num_epochs):
         train(train_loader, model, optimizer, args, writer, f)
         loss, _ = test(valid_loader, model, args, writer,f)
@@ -125,7 +128,6 @@ def main(args):
                 torch.save(model.state_dict(), f)
         with open('{0}/model_{1}.pt'.format(save_filename, epoch + 1), 'wb') as f:
             torch.save(model.state_dict(), f)
-    f.close()
 
 if __name__ == '__main__':
     import argparse
