@@ -19,8 +19,8 @@ from tensorboardX import SummaryWriter
 
 def train(data_loader, model, optimizer, args, writer):
     for i,batch in enumerate(data_loader):
-        if i > 1:
-            break
+        #if i > 1:
+        #    break
         feats = batch.to(args.device)
         #feats = feats.unsqueeze(2)
         #print("FEATS:", feats.shape)
@@ -57,8 +57,8 @@ def test(data_loader, model, args, writer):
     with torch.no_grad():
         loss_recons, loss_vq = 0., 0.
         for i, batch in enumerate(data_loader):
-            if i > 1:
-                break
+            #if i > 1:
+            #    break
             feats = batch.to(args.device)
             x_tilde, vq_loss, losses, perplexity, \
             encoding_indices, concatenated_quantized = model(feats)
