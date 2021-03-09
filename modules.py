@@ -88,15 +88,20 @@ class Conv(nn.Module):
             if residual:
                 layer = Residual(layer)
             self.cnvs.append(layer)
+
+
         
         self.relu = nn.ReLU()
+        self.batchnorm = nn.BatchNorm1d(hid_dim)
 
     def forward(self, x):
         if self.input_layer:
             x = self.input_layer(x)
             x = self.relu(x)
-        for layer in self.cnvs:
+        for i, layer in enumerate(self.cnvs):
             x = layer(x)
+            if i < len(self.cnvs)-1:
+                x = self.batchnorm(x)
             x = self.relu(x)
         return x
 
@@ -107,7 +112,7 @@ class Dense(nn.Module):
         self.relu = nn.ReLU()
         for i in range(layers):
             self.dense.append(Residual(nn.Linear(in_features=hid_dim, out_features=hid_dim)))
-        
+
     def forward(self, x):
         for layer in self.dense:
             x = layer(x)

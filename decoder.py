@@ -29,15 +29,25 @@ class Decoder(nn.Module):
         self.jitter = Jitter()
         self.pre_conv = Conv(layers=1, stride=1, kernel=3, hid_dim = hid_dim, in_dim=in_dim, residual=False)
         self.upsample = nn.Upsample(scale_factor=2)
-        self.conv_mid = Conv(layers=2, stride=1, kernel=3, hid_dim = hid_dim)
-        self.conv_post = Conv(layers=3, stride=1, kernel=3, hid_dim = hid_dim, out_dim=out_dim, residual=False, transpose=True)
+        self.conv_mid = Conv(layers=4, stride=1, kernel=3, hid_dim = hid_dim)
+        self.conv_trans1 = Conv(layers=2, stride=1, kernel=3, hid_dim = hid_dim, out_dim=hid_dim, residual=False, transpose=True)
+        self.conv_trans2 = Conv(layers=1, stride=1, kernel=2, hid_dim = hid_dim, out_dim=out_dim, residual=False, transpose=True)
 
     def forward(self, x):
+        #print("Before jitter:", x.shape)
         x = self.jitter(x)
+        #print("After jitter:", x.shape)
         x = self.pre_conv(x)
+        #print("after pre_conv:", x.shape)
         x = self.upsample(x)
+        #print("After upsample:", x.shape)
         x = self.conv_mid(x)
-        return self.conv_post(x)
+        #print("After conv_mid", x.shape)
+        x = self.conv_trans1(x)
+        #print("After trans1:", x.shape)
+        out = self.conv_trans2(x)
+        #print("After trans2:", out.shape)
+        return out
 
 if __name__ == '__main__':
     dec = Decoder()

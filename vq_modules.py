@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.normal import Normal
 from torch.distributions import kl_divergence
+from vq_vae import VectorQuantizer
 
 from vq_funcs import vq, vq_st
 from encoder import Encoder
@@ -86,12 +87,13 @@ class VQEmbedding(nn.Module):
         self.embedding.weight.data.uniform_(-1./K, 1./K)
 
     def forward(self, z_e_x):
-        z_e_x_ = z_e_x.permute(0, 2, 3, 1).contiguous()
+        z_e_x_ = z_e_x.permute(0, 3, 1, 2).contiguous()
+        print("enc_out:",z_e_x_.shape)
         latents = vq(z_e_x_, self.embedding.weight)
         return latents
 
     def straight_through(self, z_e_x):
-        z_e_x_ = z_e_x.permute(0, 2, 3, 1).contiguous()
+        z_e_x_ = z_e_x.permute(0, 3, 1, 2).contiguous()
         z_q_x_, indices = vq_st(z_e_x_, self.embedding.weight.detach())
         z_q_x = z_q_x_.permute(0, 3, 1, 2).contiguous()
 
@@ -101,7 +103,6 @@ class VQEmbedding(nn.Module):
         z_q_x_bar = z_q_x_bar_.permute(0, 3, 1, 2).contiguous()
 
         return z_q_x, z_q_x_bar
-
 
 class ResBlock(nn.Module):
     def __init__(self, dim):
@@ -120,7 +121,7 @@ class ResBlock(nn.Module):
 
 
 class VectorQuantizedVAE(nn.Module):
-    def __init__(self, input_dim, dim, K=512):
+    def __init__(self, input_dim, hid_dim, enc_dim, K=512):
         super().__init__()
         '''
         self.encoder = nn.Sequential(
@@ -155,7 +156,9 @@ class VectorQuantizedVAE(nn.Module):
 
     def encode(self, x):
         z_e_x = self.encoder(x)
+        z_e_x = z_e_x.unsqueeze(1)
         latents = self.codebook(z_e_x)
+        print("Latents", latents.shape)
         return latents
 
     def decode(self, latents):
@@ -164,11 +167,10 @@ class VectorQuantizedVAE(nn.Module):
         return x_tilde
 
     def forward(self, x):
-        z_e_x = self.encoder(x)
-        z_e_x = z_e_x.unsqueeze(1)
+        z_e_x = self.encode(x)
         z_q_x_st, z_q_x = self.codebook.straight_through(z_e_x)
         z_q_x_st = z_q_x_st.squeeze(1).permute(0,2,1).contiguous()
-        x_tilde = self.decoder(z_q_x_st)
+        x_tilde = self.decode(z_q_x_st)
         return x_tilde, z_e_x, z_q_x
 
 
