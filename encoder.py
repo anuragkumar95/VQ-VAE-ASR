@@ -21,12 +21,9 @@ class Encoder(nn.Module):
         x = self.conv_strided(x)
         x = self.conv_post(x)
         x = x.permute(0,2,1)
-        print("before dense:", x.shape)
         x = self.dense(x)
-        print("after dense:", x.shape)
         x = self.out(x)
         out = x.permute(0, 2, 1)
-        print("output shape:", out.shape)
         return x
 
 
