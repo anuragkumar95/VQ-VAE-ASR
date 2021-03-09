@@ -85,8 +85,10 @@ class Conv(nn.Module):
 
     def forward(self, x):
         if self.input_layer:
+            print(x.shape)
             x = self.input_layer(x)
             x = self.relu(x)
+            print("After Input:", x.shape)
         for i, layer in enumerate(self.cnvs):
             x = layer(x)
             if i < len(self.cnvs)-1:
