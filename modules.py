@@ -3,7 +3,6 @@ import torch
 import numpy as np
 import os
 import sys
-from preproc import DataVAE, collate_vae
 
 #https://github.com/swasun/VQ-VAE-Speech/blob/master/src/modules/jitter.py
 
@@ -101,23 +100,3 @@ class Dense(nn.Module):
             x = layer(x)
             x = self.relu(x)
         return x
-
-#######################################
-        
-train_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
-                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
-train_loader = torch.utils.data.DataLoader(train_dataset,
-                                          batch_size=10, 
-                                          shuffle=False, 
-                                          pin_memory=True, 
-                                          collate_fn=collate_vae)
-
-device = torch.device("cuda:2")
-model = Conv(layers=2, stride=1, kernel=3, hid_dim=768, in_dim=39)
-model.cuda()
-model = model.to(device)
-model = nn.DataParallel(model, device_ids=[2, 3])
-
-for batch in train_loader:
-    out = model(batch)
-    print(out.shape)
