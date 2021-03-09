@@ -56,7 +56,8 @@ class Residual(nn.Module):
         return x + self.layer(x)
 
 class Conv(nn.Module):
-    def __init__(self, layers, stride, kernel, hid_dim, in_dim=None, out_dim=None, residual=True, transpose=False):
+    def __init__(self, layers, stride, kernel, hid_dim, 
+                 in_dim=None, out_dim=None, residual=True):
         super().__init__()
         self.cnvs = nn.ModuleList()
         if in_dim:
@@ -69,27 +70,14 @@ class Conv(nn.Module):
             layers += 1 
             self.input_layer=None
         for i in range(layers-1):
-            if transpose:
-                if i == layers-2:
-                    out_ch = out_dim
-                else:
-                    out_ch = hid_dim
-                layer = nn.ConvTranspose1d(in_channels=hid_dim, 
-                                           out_channels=out_ch,
-                                           kernel_size=kernel,
-                                           stride=stride,
-                                           padding=1)
-            else:
-                layer = nn.Conv1d(in_channels=hid_dim, 
-                                out_channels=hid_dim,
-                                kernel_size=kernel,
-                                stride=stride,
-                                padding=1)
+            layer = nn.Conv1d(in_channels=hid_dim, 
+                            out_channels=hid_dim,
+                            kernel_size=kernel,
+                            stride=stride,
+                            padding=1)
             if residual:
                 layer = Residual(layer)
             self.cnvs.append(layer)
-
-
         
         self.relu = nn.ReLU()
         self.batchnorm = nn.BatchNorm1d(hid_dim)
