@@ -68,9 +68,6 @@ class Conv(nn.Module):
                                          kernel_size=kernel,
                                          stride=stride,
                                          padding=1)
-        else:
-            layers += 1 
-            self.input_layer=None
         for i in range(layers-1):
             layer = nn.Conv1d(in_channels=hid_dim, 
                             out_channels=hid_dim,
@@ -84,15 +81,13 @@ class Conv(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        if self.input_layer:
-            print(x.shape)
-            x = self.input_layer(x)
-            x = self.relu(x)
-            print("After Input:", x.shape)
-        for i, layer in enumerate(self.cnvs):
+        print(x.shape)
+        x = self.input_layer(x)
+        x = self.relu(x)
+        print("After Input:", x.shape)
+        print("len others:", len(self.cnvs))
+        for layer in self.cnvs:
             x = layer(x)
-            if i < len(self.cnvs)-1:
-                x = self.batchnorm(x)
             x = self.relu(x)
         return x
 
