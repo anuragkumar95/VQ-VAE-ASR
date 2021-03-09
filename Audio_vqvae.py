@@ -24,5 +24,4 @@ class audio_vqvae(nn.Module):
         #print("reconstructed_x:", reconstructed.shape)
         input_features_size = x.size(2)
         output_features_size = reconstructed.size(2)
-
         return reconstructed, vq_loss, losses, perplexity, encoding_indices, concatenated_quantized
