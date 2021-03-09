@@ -55,6 +55,7 @@ class Residual(nn.Module):
         self.layer = layer
 
     def forward(self, x):
+        print("Do residual")
         return x + self.layer(x)
 
 class Conv(nn.Module):
