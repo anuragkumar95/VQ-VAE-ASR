@@ -82,8 +82,9 @@ class Conv(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = self.input_layer(x)
-        x = self.relu(x)
+        if self.input_layer:
+            x = self.input_layer(x)
+            x = self.relu(x)
         for layer in self.cnvs:
             x = layer(x)
             x = self.relu(x)
