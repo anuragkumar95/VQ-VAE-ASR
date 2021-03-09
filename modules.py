@@ -67,6 +67,8 @@ class Conv(nn.Module):
                                          kernel_size=kernel,
                                          stride=stride,
                                          padding=1)
+        else:
+            layers+=1
         for i in range(layers-1):
             layer = nn.Conv1d(in_channels=hid_dim, 
                             out_channels=hid_dim,
