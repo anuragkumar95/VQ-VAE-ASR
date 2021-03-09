@@ -21,7 +21,9 @@ class Encoder(nn.Module):
         x = self.conv_strided(x)
         x = self.conv_post(x)
         x = x.permute(0,2,1)
+        print("before dense:", x.shape)
         x = self.dense(x)
+        print("after dense:", x.shape)
         x = self.out(x)
         out = x.permute(0, 2, 1)
         print("output shape:", out.shape)
@@ -37,7 +39,7 @@ train_loader = torch.utils.data.DataLoader(train_dataset,
                                           collate_fn=collate_vae)
 
 device = torch.device("cuda:2")
-model = Encoder(39, 768, 128)
+model = Encoder(39, 768, 64)
 model.cuda()
 model = model.to(device)
 model = nn.DataParallel(model, device_ids=[2, 3])
