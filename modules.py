@@ -127,4 +127,4 @@ model = model.to(device)
 model = nn.DataParallel(model, device_ids=[2, 3])
 
 for batch in train_loader:
-    print(batch.shape)
+    out = model(x)
