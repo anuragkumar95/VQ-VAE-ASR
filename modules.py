@@ -55,7 +55,6 @@ class Residual(nn.Module):
         self.layer = layer
 
     def forward(self, x):
-        print("Do residual")
         return x + self.layer(x)
 
 class Conv(nn.Module):
@@ -82,11 +81,8 @@ class Conv(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        print(x.shape)
         x = self.input_layer(x)
         x = self.relu(x)
-        print("After Input:", x.shape)
-        print("len others:", len(self.cnvs))
         for layer in self.cnvs:
             x = layer(x)
             x = self.relu(x)
@@ -124,3 +120,4 @@ model = nn.DataParallel(model, device_ids=[2, 3])
 
 for batch in train_loader:
     out = model(batch)
+    print(out.shape)
