@@ -10,10 +10,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.normal import Normal
 from torch.distributions import kl_divergence
+from vq_vae import VectorQuantizer
 
 from vq_funcs import vq, vq_st
 from encoder import Encoder
-from wavenet_model import *
+from decoder import Decoder
+#from wavenet_model import *
 
 
 
@@ -77,17 +79,6 @@ class VAE(nn.Module):
         x_tilde = self.decoder(q_z_x.rsample())
         return x_tilde, kl_div
 
-class VAE_Audio(nn.Module):
-    def __init__(self, num_layers=6):
-        super().__init__()
-        self.conv = nn.ModuleList()
-        for i in range(num_layers):
-            self.conv.append(nn.Conv1D(in_channels=1, 
-                                       out_channels=1, 
-                                       stride=2, 
-                                       kernel_size=4))
-
-
 
 class VQEmbedding(nn.Module):
     def __init__(self, K, D):
@@ -96,12 +87,13 @@ class VQEmbedding(nn.Module):
         self.embedding.weight.data.uniform_(-1./K, 1./K)
 
     def forward(self, z_e_x):
-        z_e_x_ = z_e_x.permute(0, 2, 3, 1).contiguous()
+        z_e_x_ = z_e_x.permute(0, 3, 1, 2).contiguous()
+        print("enc_out:",z_e_x_.shape)
         latents = vq(z_e_x_, self.embedding.weight)
         return latents
 
     def straight_through(self, z_e_x):
-        z_e_x_ = z_e_x.permute(0, 2, 3, 1).contiguous()
+        z_e_x_ = z_e_x.permute(0, 3, 1, 2).contiguous()
         z_q_x_, indices = vq_st(z_e_x_, self.embedding.weight.detach())
         z_q_x = z_q_x_.permute(0, 3, 1, 2).contiguous()
 
@@ -111,7 +103,6 @@ class VQEmbedding(nn.Module):
         z_q_x_bar = z_q_x_bar_.permute(0, 3, 1, 2).contiguous()
 
         return z_q_x, z_q_x_bar
-
 
 class ResBlock(nn.Module):
     def __init__(self, dim):
@@ -130,7 +121,7 @@ class ResBlock(nn.Module):
 
 
 class VectorQuantizedVAE(nn.Module):
-    def __init__(self, input_dim, dim, K=512):
+    def __init__(self, input_dim, hid_dim, enc_dim, K=512):
         super().__init__()
         '''
         self.encoder = nn.Sequential(
@@ -142,10 +133,12 @@ class VectorQuantizedVAE(nn.Module):
             ResBlock(dim),
         )
         '''
-        self.encoder = Encoder(input_dim)
+
+        self.encoder = Encoder(in_dim=input_dim, hid_dim=dim)
 
         self.codebook = VQEmbedding(K, dim)
-
+        
+        '''
         self.decoder = nn.Sequential(
             ResBlock(dim),
             ResBlock(dim),
@@ -156,12 +149,16 @@ class VectorQuantizedVAE(nn.Module):
             nn.ConvTranspose2d(dim, input_dim, 4, 2, 1),
             nn.Tanh()
         )
+        '''
 
+        self.decoder = Decoder(in_dim=dim, hid_dim=dim, out_dim=input_dim)
         self.apply(weights_init)
 
     def encode(self, x):
         z_e_x = self.encoder(x)
+        z_e_x = z_e_x.unsqueeze(1)
         latents = self.codebook(z_e_x)
+        print("Latents", latents.shape)
         return latents
 
     def decode(self, latents):
@@ -170,10 +167,10 @@ class VectorQuantizedVAE(nn.Module):
         return x_tilde
 
     def forward(self, x):
-        z_e_x = self.encoder(x)
-        print("Encoder out:", z_e_x.shape)
+        z_e_x = self.encode(x)
         z_q_x_st, z_q_x = self.codebook.straight_through(z_e_x)
-        x_tilde = self.decoder(z_q_x_st)
+        z_q_x_st = z_q_x_st.squeeze(1).permute(0,2,1).contiguous()
+        x_tilde = self.decode(z_q_x_st)
         return x_tilde, z_e_x, z_q_x
 
 

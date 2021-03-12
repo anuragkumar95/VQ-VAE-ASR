@@ -4,7 +4,7 @@ import torch.utils.data as data
 import torch.nn as nn
 import os
 import numpy as np
-import librosa
+#import librosa
 from tqdm import tqdm
 import csv
 import pandas as pd
@@ -120,4 +120,4 @@ def collate_vae(data):
         #print(feature.shape, batch_audio.shape, maxlen)
         batch.append(batch_audio)
 
-    return torch.stack(batch).unsqueeze(1)
+    return torch.stack(batch)

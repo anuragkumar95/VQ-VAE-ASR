@@ -9,6 +9,8 @@ import torch.nn.functional as F
 from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
 import torch.nn as nn
+from Audio_vqvae import audio_vqvae
+from torch.nn import DataParallel
 
 from vq_modules import VectorQuantizedVAE, to_scalar
 from preproc import DataVAE, collate_vae
@@ -16,54 +18,67 @@ from preproc import DataVAE, collate_vae
 from tensorboardX import SummaryWriter
 
 def train(data_loader, model, optimizer, args, writer):
-    for batch in data_loader:
+    for i,batch in enumerate(data_loader):
+        #if i > 1:
+        #    break
         feats = batch.to(args.device)
+        #feats = feats.unsqueeze(2)
+        #print("FEATS:", feats.shape)
 
         optimizer.zero_grad()
-        x_tilde, z_e_x, z_q_x = model(feats)
-        pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
-                                feats.shape[2]-x_tilde.shape[2], 0))
+        x_tilde, vq_loss, losses, perplexity, \
+            encoding_indices, concatenated_quantized = model(feats)
+        pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[2]-x_tilde.shape[2], 
+                                feats.shape[1]-x_tilde.shape[1], 0))
         x_tilde = pred_pad(x_tilde)
 
         # Reconstruction loss
         loss_recons = F.mse_loss(x_tilde, feats)
         # Vector quantization objective
-        loss_vq = F.mse_loss(z_q_x, z_e_x.detach())
+        #loss_vq = F.mse_loss(z_q_x, z_e_x.detach())
         # Commitment objective
-        loss_commit = F.mse_loss(z_e_x, z_q_x.detach())
+        #loss_commit = F.mse_loss(z_ex, z_q_x.detach())
 
-        loss = loss_recons + loss_vq + args.beta * loss_commit
+        loss = loss_recons + vq_loss #+ args.beta * loss_commit
         loss.backward()
         print("Training loss:", loss.detach().cpu().numpy())
 
         # Logs
         writer.add_scalar('loss/train/reconstruction', loss_recons.item(), args.steps)
-        writer.add_scalar('loss/train/quantization', loss_vq.item(), args.steps)
-
+        #writer.add_scalar('loss/train/quantization', loss_vq.item(), args.steps)
+        
         optimizer.step()
         args.steps += 1
+        f = open(args.logs+'results_train.txt', 'a+')
+        f.write("step "+str(args.steps)+":"+str(loss.detach().cpu().numpy())+'\n')
+        f.close()
 
 def test(data_loader, model, args, writer):
     with torch.no_grad():
         loss_recons, loss_vq = 0., 0.
-        for batch in data_loader:
+        for i, batch in enumerate(data_loader):
+            #if i > 1:
+            #    break
             feats = batch.to(args.device)
-            x_tilde, z_e_x, z_q_x = model(feats)
-            pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[3]-x_tilde.shape[3], 
-                                feats.shape[2]-x_tilde.shape[2], 0))
+            x_tilde, vq_loss, losses, perplexity, \
+            encoding_indices, concatenated_quantized = model(feats)
+            pred_pad = nn.ZeroPad2d(padding=(0, feats.shape[2]-x_tilde.shape[2], 
+                                    feats.shape[1]-x_tilde.shape[1], 0))
             x_tilde = pred_pad(x_tilde)
             loss_recons += F.mse_loss(x_tilde, feats)
-            loss_vq += F.mse_loss(z_q_x, z_e_x)
+            #print(loss_recons)
+            loss_vq += vq_loss
 
-        loss_recons /= len(data_loader)
-        loss_vq /= len(data_loader)
-        print("Validation Loss:", loss_recons.detach().cpu().numpy(), loss_vq.detach().cpu().numpy())
-
+        vq_loss /= len(data_loader)
+        print("Validation Loss:", loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())
+        f = open(args.logs+'results_val.txt', 'a+')
+        f.write("Validation:"+str(loss_recons.detach().cpu().numpy() + vq_loss.detach().cpu().numpy())+'\n')
+        f.close()
     # Logs
-    writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
-    writer.add_scalar('loss/test/quantization', loss_vq.item(), args.steps)
-
-    return loss_recons.item(), loss_vq.item()
+    #writer.add_scalar('loss/test/reconstruction', loss_recons.item(), args.steps)
+    #writer.add_scalar('loss/test/quantization', loss_vq.item(), args.steps)
+    return loss_recons, vq_loss
+    #return loss_recons.item(), loss_vq.item()
 
 def generate_samples(feats, model, args):
     with torch.no_grad():
@@ -75,13 +90,13 @@ def main(args):
     writer = SummaryWriter('./logs/{0}'.format(args.output_folder))
     save_filename = './models/{0}'.format(args.output_folder)
     
-    train_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/train.tsv',
-                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    train_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/train.tsv',
+                         '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
 
-    valid_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
-                        '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
-    test_dataset = DataVAE('/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/test.tsv',
-                         '/nobackup/anakuzne/data/cv/cv-corpus-5.1-2020-06-22/eu/clips/')
+    valid_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/dev.tsv',
+                        '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
+    test_dataset = DataVAE('/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/test.tsv',
+                         '/nobackup/ak16/Basque/cv-corpus-5.1-2020-06-22/eu/clips/')
 
     # Define the data loaders
     train_loader = torch.utils.data.DataLoader(train_dataset,
@@ -95,12 +110,17 @@ def main(args):
 
     # Fixed images for Tensorboard
 
-
-    model = VectorQuantizedVAE(1, args.hidden_size, args.k).to(args.device)
+    model = audio_vqvae(input_dim=39, 
+                        hid_dim=args.hidden_size, 
+                        enc_dim=64, 
+                        K=args.k).to(args.device)
+    #model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+    #model = VectorQuantizedVAE(39, args.hidden_size, args.k).to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
 
-    best_loss = -1.
+    best_loss = -1
+    
     for epoch in range(args.num_epochs):
         train(train_loader, model, optimizer, args, writer)
         loss, _ = test(valid_loader, model, args, writer)
@@ -148,6 +168,8 @@ if __name__ == '__main__':
         help='number of workers for trajectories sampling (default: {0})'.format(mp.cpu_count() - 1))
     parser.add_argument('--device', type=str, default='cpu',
         help='set the device (cpu or cuda, default: cpu)')
+
+    parser.add_argument('--logs', type=str , default='logs/')
 
     args = parser.parse_args()
 

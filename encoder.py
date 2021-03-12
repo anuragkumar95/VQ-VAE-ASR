@@ -2,74 +2,28 @@ import torch.nn as nn
 import numpy as np
 import os
 import sys
+from modules import Conv, Dense
 
 
-class Residual(nn.Module):
-    def __init__(self, layer):
-        super().__init__()
-        self.layer = layer
-
-    def forward(self, x):
-        return x + self.layer(x)
-
-class Conv(nn.Module):
-    def __init__(self, layers, stride, kernel, in_dim=None, residual=True):
-        super().__init__()
-        self.cnvs = nn.ModuleList()
-        if in_dim:
-            self.input_layer = nn.Conv2d(in_channels=in_dim, 
-                                         out_channels=768,
-                                         kernel_size=kernel,
-                                         stride=stride)
-        else:
-            self.input_layer=None
-        for i in range(len(layers)):
-            layer = nn.Conv2d(in_channels=768, 
-                              out_channels=768,
-                              kernel_size=kernel,
-                              stride=stride)
-            if residual:
-                self.cnvs.append(Residual(layer))
-            else:
-                self.cnvs.append(layer)
-        self.relu = nn.ReLU()
-
-    def forward(self, x):
-        if self.input_layer:
-            x = self.input_layer(x)
-            x = self.relu(x)
-        for layer in self.cnvs:
-            x = layer(x)
-            x = self.relu(x)
-        return x
-
-class Dense(nn.Module):
-    def __init__(self, layers):
-        super().__init__()
-        self.dense = nn.ModuleList()
-        self.relu = nn.ReLU()
-        for i in range(layers):
-            self.dense.append(Residual(nn.Linear(in_features=768, out_features=768)))
-        
-    def forward(self, x):
-        for layer in self.dense:
-            x = layer(x)
-            x = self.relu(x)
-        return x
-        
 class Encoder(nn.Module):
-    def __init__(self, in_dim):
+    def __init__(self, in_dim, hid_dim, enc_dim):
         super().__init__()
-        self.conv_pre = Conv(layers=1, stride=1, kernel=3, in_dim=in_dim)
-        self.conv_strided = Conv(layers=1, stride=2, kernel=4, residual=False)
-        self.conv_post = Conv(layers=2, stride=1, kernel=3)
-        self.dense = Dense(layers=4)
+        self.conv_pre = Conv(layers=2, stride=1, kernel=3, hid_dim = hid_dim, in_dim=in_dim)
+        self.conv_strided = Conv(layers=1, stride=2, kernel=4, hid_dim = hid_dim, residual=False)
+        self.conv_post = Conv(layers=2, stride=1, kernel=3, hid_dim = hid_dim)
+        self.dense = Dense(layers=4, hid_dim=hid_dim)
+        self.out = nn.Linear(in_features=hid_dim, out_features=enc_dim)
 
     def forward(self, x):
         x = self.conv_pre(x)
+        #print("Before stride:",x.shape)
         x = self.conv_strided(x)
+        #print("After stride:",x.shape)
         x = self.conv_post(x)
+        #print("Conv after stride:", x.shape)
+        x = x.permute(0,2,1)
         x = self.dense(x)
-        print("DENSE", x.shape)
-
-        return x
+        x = self.out(x)
+        out = x.permute(0, 2, 1)
+        #print("output shape:", out.shape)
+        return out
