@@ -23,7 +23,7 @@ class Conv(nn.Module):
                                          stride=stride)
         else:
             self.input_layer=None
-        for i in range(layers):
+        for i in range(len(layers)):
             layer = nn.Conv2d(in_channels=768, 
                               out_channels=768,
                               kernel_size=kernel,
